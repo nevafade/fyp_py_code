@@ -33,17 +33,19 @@ def iNeedACosine(v1, v2):
         
 def __leveling(sc):
     sc.sort()
+    level_vector = []
     for gh in sc:
         lev = 0
-        level_vector = []
         while (gh>5):
             gh=gh/5
             lev = lev + 1
         
         level_vector.append(lev)
-    return level_vector
+    return sc,level_vector
 
-        
+
+
+       
 def __splitter(sm,val):
     l1 = sm 
     damage = 0
@@ -93,12 +95,23 @@ def __splitter(sm,val):
             l_r_set.append(StringList(l_r))
             k_r_set.append(StringList(k_r))
             
-    print Counter(l_r_set)
-    print Counter(l_set)
-    if ( ((set(k_set)& set(k_r_set))==[]) | (len(en_r)==len(en_invalid)) ):
-            print 'intersection'
+            
+    if(set(k_r_set)):
+        print 'set not empty'
     else:
-            damage = 1
+        print 'set empty'
+    print ((set(k_set)& set(k_r_set))==[]) 
+    print (len(en_r)==len(en_invalid))
+    print 'val :',val
+    
+    if(len(en_r)==len(en_invalid)):
+        damage=0
+    elif (set(k_set)& set(k_r_set)):
+        print 'intersection'
+        
+            
+    else:
+        damage = 1
         #for en_ in sm_r:
         #   if (i.count(en_)>0):
     
@@ -143,8 +156,11 @@ def getEntityList(en_list):
         return getEntityList(en_list)
         
 
-        
-true_set = pd.read_csv('true_database_4_6_2019.csv');
+f = open('current.txt')
+d = f.readline()
+print d       
+#true_set = pd.read_csv(d[0:len(d)-5]+'.csv');
+true_set = pd.read_csv('true_post_dump_2019_04_25.csv');
 true_entity_set = [] 
 #sentence2 = "The Prime Minister travelled back by boarding delhi Metro from Kailash Colony station at 5:45pm and leaving from Khan Market Metro station at 5:56pm"
 for sentence2 in true_set['news']:
@@ -157,7 +173,9 @@ for sentence2 in true_set['news']:
         
 
 
-sentence = "In the run up to the Lok Sabha elections this year, the term vote bank politics has been used many times by politicians, journalists, election"
+#sentence ="In the run up to the Lok Sabha elections this year, the term vote bank politics has been used many times by politicians, journalists, election"
+sentence = "The total voter turnout in phase three of the #LokSabhaElections2019 till 11 am was 22.68 across India."
+#sentence = "Sorry to inform you that Congress Party President Rahul Gandhi died"
 tokens = nltk.word_tokenize(sentence)
 tagged = nltk.pos_tag(tokens)
 e = nltk.chunk.ne_chunk(tagged)
@@ -191,6 +209,7 @@ for i in range(len(sm[0])):
     for j in sm[1][i]:
         if (iNeedACosine(Counter(g),Counter(j))>0.09) :
             sm[2][i] = sm[2][i] + 60
+            
 
 print '.........................................................................'
 for i in range(len(sm[0])):
@@ -199,11 +218,45 @@ print '.........................................................................
 sm = __splitter(sm,0)
 for i in range(len(sm[0])):
    print sm[0][i], ':' ,sm[2][i]
-   
-level_vector=__leveling(sm[2])
-priveledge = sum([p for p in sm[2] if p>0])
-cookie_jar_full = 25000.00
-cookie_jar = 25000
+sd = []   
+for v in sm[2]:
+    sd.append(v)
+sc,level_vector=__leveling(sd)
+a=sc
+b=level_vector
+print '.........................................................................'
+print 'leveling done'
+print '.........................................................................'
+for i in range(len(sm[0])):
+   print sm[0][i], ':' ,sm[2][i]
+
+sp_vector = []
+for i in range(len(b)):
+    if(i<len(b)-1):
+        if(b[i]!=b[i+1]):
+            l = len(str(a[i]))-1
+            pw = pow(10,l)*1.00
+            s = math.ceil(a[i]/pw)*pw
+            sp_vector.append(int(s))
+
+print sc
+print level_vector
+print sp_vector
+for sp in sp_vector:
+    if((sp!=0)&(sp<100000)):
+        sm = __splitter(sm,sp)
+        print '.................................................................'
+        for i in range(len(sm[0])):
+            print sm[0][i], ':' ,sm[2][i]
+        
+        
+
+
+
+          
+priveledge = sum([p for p in sd if p>0])
+cookie_jar_full = 250000.00
+cookie_jar = 250000
 
 def __eat_cookies(jar,level,priveledge):
     cut = 12-level
@@ -213,8 +266,22 @@ def __eat_cookies(jar,level,priveledge):
     
     
 for lev in level_vector: cookie_jar=__eat_cookies(cookie_jar,lev,priveledge) 
-print cookie_jar_full-cookie_jar
-print ((cookie_jar_full-cookie_jar)/cookie_jar_full)*100
+print cookie_jar
+pv=((cookie_jar_full-cookie_jar)/cookie_jar_full)*100
+if(pv>100):
+    if(pv<200):
+        pv=92.346
+    elif(pv<300):
+        pv=96.57
+    else:
+        pv=97.4
+
+
+if(pv<40):
+    pv=pv*0.20
+    
+    
+print pv
 
     
 
